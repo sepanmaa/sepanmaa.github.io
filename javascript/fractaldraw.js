@@ -9,9 +9,9 @@ function getMousePos(canvas, evt) {
 function zoom(canvas, frac) {
     canvas.addEventListener("click",
     			    function (event) {
-    				var pos = getMousePos(canvas, event);
-    				frac.zoomIn(pos.x, pos.y);
-				frac.draw(canvas);
+    				    var pos = getMousePos(canvas, event);
+    				    frac.zoomIn(pos.x, pos.y);
+				    frac.draw(canvas);
     			    });    
 }
 

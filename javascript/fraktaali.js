@@ -32,6 +32,11 @@ var Fraktaali = (function () {
 	this.pixels = null;
 	this.getC = function (x, y) { return new Complex(x, y) }
 	this.getZ = function (x, y) { return new Complex(x, y) }
+	this.updatePixels = function() {
+	    this.pixels = fractal(this.size, this.iterations,
+				  this.rx, this.ry, this.area,
+				  this.getC, this.getZ, this.pixels);
+	}
     }
 
     function Mandelbrot(size, iterations, rx, ry, area) {
@@ -53,11 +58,15 @@ var Fraktaali = (function () {
     Julia.prototype.constructor = Julia;
 
     Fractal.prototype.getPixels = function() {
-	if (this.pixels == null)
-	    this.pixels = fractal(this.size, this.iterations,
-				  this.rx, this.ry, this.area,
-				  this.getC, this.getZ);
+	this.updatePixels();
 	return this.pixels;
+    }
+
+    Fractal.prototype.setPixels = function(pixels) {
+	if (pixels == null)
+	    this.updatePixels();
+	else
+	    this.pixels = pixels;
     }
 
     Fractal.prototype.centerAt = function(x, y) {
@@ -73,7 +82,6 @@ var Fraktaali = (function () {
 	this.area = this.area / 2;
 	this.rx = this.rx + this.area / 2;
 	this.ry = this.ry + this.area / 2;
-	this.pixels = null;
     }
 
     Fractal.prototype.zoomOut = function(x, y) {
@@ -81,18 +89,17 @@ var Fraktaali = (function () {
 	this.area = this.area * 2;
 	this.rx = this.rx - this.area / 4;
 	this.ry = this.ry - this.area / 4;
-	this.pixels = null;
     }
 
-    Fractal.prototype.draw = function(canvas) {
+    Fractal.prototype.draw = function(canvas) {	
 	if (canvas && canvas.getContext) {
 	    var ctx = canvas.getContext("2d");
-	    var pixels = this.getPixels();
-	    var size = pixels.length;
+	    this.setPixels();
+	    var size = this.pixels.length;
 	    for (var i = 0; i < size; i++) {
     		for (var j = 0; j < size; j++) {
-		    var hue = pixels[i][j] % 256;
-		    if  (pixels[i][j] == 0)
+		    var hue = this.pixels[i][j] % 256;
+		    if  (this.pixels[i][j] == 0)
 			ctx.fillStyle = "hsl(0,0%,0%)";
 		    else
 			ctx.fillStyle = "hsl(" + hue + ",100%,50%)";
@@ -119,9 +126,9 @@ var Fraktaali = (function () {
        coordinates, and functions getC and getZ for generating the
        complex numbers for each pixel.
      */
-    function fractal(size, iterations, rx, ry, area, getC, getZ) {
+    function fractal(size, iterations, rx, ry, area, getC, getZ, arr) {
 	var e = area / size;
-	var pixels = makePixels(size);
+	var pixels = arr || makePixels(size);
 	for (var y = ry, yi = 0; yi < size; y += e, yi++) {
 	    for (var x = rx, xi = 0; xi < size; x += e, xi++) {
 		var c = getC(x, y);
