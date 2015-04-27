@@ -142,7 +142,11 @@ var Fraktaali = (function () {
 	mandelbrot: function(size, iterations, rx, ry, area) {
 	    return new Mandelbrot(size, iterations, rx, ry, area);
 	},
-	julia: function(size, iterations, rx, ry, area, cr = -0.7, ci = 0.27) {
+	julia: function(size, iterations, rx, ry, area, cr, ci) {
+	    if (cr == undefined || ci == undefined) {
+		cr = -0.7;
+		ci = 0.27;
+	    }
 	    return new Julia(size, iterations, rx, ry, area, cr, ci);
 	}
     };
