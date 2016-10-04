@@ -1,9 +1,9 @@
-"use strict";
+//"use strict";
 
 var blocks = [],
     width = 400,
     height = 400,
-    ROWS = 10,
+    ROWS = 16,
     COLS = 5,
     blockWidth = 80,
     blockHeight = 10,
@@ -14,7 +14,7 @@ var blocks = [],
 var paddle = {
     width: 80,
     height: 10,
-    speed: 200,
+    speed: 320,
     x: 0,
     y: 0,    
     dir: 0,
@@ -106,9 +106,8 @@ function start() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
     camera.position.z = 400;
-    camera.position.x = 300;
+    camera.position.x = 200;
     camera.position.y = 200;
-    camera.rotation.y = 10 * Math.PI / 180;
     initLights();
     initEdges();
     initStatusText();
@@ -121,10 +120,8 @@ function start() {
 	var delta = timestamp - time;
 	time = timestamp;
 	var paddleDelta = paddle.speed*delta/1000;
-    	if (paddle.dir === -1 && paddle.x > paddleDelta) 
-    	    paddle.x += paddleDelta * paddle.dir;
-    	else if (paddle.dir === 1
-		 && paddle.x + paddleDelta + paddle.width < width)
+    	if ((paddle.dir === -1 && paddle.x > paddleDelta) ||
+    	    (paddle.dir === 1 && paddle.x + paddleDelta + paddle.width < width))
     	    paddle.x += paddleDelta * paddle.dir;
 	if (game.state === "running") {
 	    ball.x += ball.velocity.x * delta / 1000;
@@ -177,14 +174,17 @@ function detectCollisions() {
     if (ball.x+ball.radius > width) {
 	ball.velocity.x = -ball.velocity.x;
 	ball.x = width-ball.radius;
+	return;
     }
     if (ball.x-ball.radius < 0) {
 	ball.velocity.x = -ball.velocity.x;
 	ball.x = ball.radius;
+	return;
     }
     if (ball.y+ball.radius > height) {
 	ball.velocity.y = -ball.velocity.y;
 	ball.y = height-ball.radius;
+	return;
     }
     
     // paddle
@@ -201,15 +201,16 @@ function detectCollisions() {
 	    game.state = "ready";
 	    updateStatus();
 	}
+	return;
     }
     
     // blocks
     if (ball.y+ball.radius < height-ROWS*blockHeight)
-	return false;
+	return;
     var col = Math.floor((ball.x-ball.radius)/blockWidth);
     var row = Math.floor((height-ball.y-ball.radius)/blockHeight);
     if (row < 0 || col < 0 || blocks[row][col].status === 1)
-	return false;
+	return;
     var x = col*blockWidth;
     var y = height-row*blockHeight;
     if (ball.x+ball.radius >= x && ball.x-ball.radius < x+blockWidth
@@ -220,13 +221,11 @@ function detectCollisions() {
 	game.score++;
 	game.blockCount--;
 	updateStatus();
-	return true;
     }
-    return false;
 }
 
 function initKeys() {
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener("keydown", function(e) {
 	if (e.keyCode === 39)
 	    paddle.dir = 1;
 	else if (e.keyCode === 37)
@@ -243,9 +242,10 @@ function initKeys() {
 	    game.state = "ready";
 	}
     }, false);
-    document.addEventListener("keyup", (e) => {
-	if (e.keyCode === 39 || e.keyCode === 37)
-	    paddle.dir = 0;
+    document.addEventListener("keyup", function(e) {
+	if ((e.keyCode === 39 && paddle.dir === 1) ||
+	    (e.keyCode === 37 && paddle.dir === -1))
+    	    paddle.dir = 0;
     }, false);
 }
 
@@ -277,8 +277,8 @@ function initGame() {
 	    blocks[i][j] = { status: 0,
 			     object: object
 			   };
-	    object.position.set(j*blockWidth+paddle.width/2,
-				height-(i*blockHeight+paddle.height/2), 0);
+	    object.position.set(j*blockWidth+blockWidth/2,
+				height-(i*blockHeight+blockHeight/2), 0);
 	    scene.add(object);
 	}
     }
