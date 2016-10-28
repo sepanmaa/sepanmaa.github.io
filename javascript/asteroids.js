@@ -9891,7 +9891,8 @@ var _user$project$Main$view = function (model) {
 				_elm_lang$html$Html_Attributes$style(
 				_elm_lang$core$Native_List.fromArray(
 					[
-						{ctor: '_Tuple2', _0: 'height', _1: '100%'}
+						{ctor: '_Tuple2', _0: 'height', _1: '100%'},
+						{ctor: '_Tuple2', _0: 'overflow', _1: 'hidden'}
 					]))
 			]),
 		_elm_lang$core$Native_List.fromArray(
